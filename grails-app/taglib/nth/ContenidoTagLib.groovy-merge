@@ -1,0 +1,706 @@
+package nth
+
+class ContenidoTagLib {
+
+    def mostrarSeccion = {attrs ->
+        def id = attrs["id"]
+//        def idIdioma = session.idioma
+        def tipo = attrs["tipo"]
+
+        def seccion = Seccion.get(id)
+        def pagSeccion = Pagina.get(attrs.pagina)
+        def idioma = session.idioma
+        if (!idioma) {
+            idioma = Idioma.findByAbreviacion("es")
+        }
+
+        if (!seccion.contenido) {
+            if (seccion.tipo == "Publicaciones") {
+//                out << "<div name='testP' style='position:absolute;top:${seccion.top}px;left:${seccion.izq}px;${seccion.css}'>"
+                out << "<div name='test' style='overflow-x:hidden; overflow-y:auto;position:absolute;top:${seccion.top}px;left:${seccion.izq}px;height:${seccion.height}px;${seccion.css}'>"
+            } else if (seccion.tipo == "GuestBook") {
+                out << "<div name='test' style='overflow-x:hidden; overflow-y:auto;position:absolute;top:${seccion.top}px;left:${seccion.izq}px;width:${seccion.width}px;height:${seccion.height}px;${seccion.css}'>"
+            } else {
+                out << "<div name='test' style='position:absolute;top:${seccion.top}px;left:${seccion.izq}px;width:${seccion.width}px;height:${seccion.height}px;${seccion.css}' >"
+            }
+        } else {
+            if (seccion.tipo == "Layout") {
+                out << '<div class="contendido" style="position:absolute;top:' + seccion.contenido.layout.contenido.top + ';left:' + seccion.contenido.layout.contenido.izq + ';width:' + seccion.contenido.layout.contenido.width + ';height:' + seccion.contenido.layout.contenido.height + ';' + seccion.contenido.layout.contenido.css + '">'
+            } else if (seccion.tipo == "Link") {
+                out << "<div name='test' style='position:absolute;top:${seccion.top}px;left:${seccion.izq}px;width:${seccion.width}px;height:${seccion.height}px;${seccion.css};' >"
+            } else {
+                out << "<div style='position:absolute;top:${seccion.top}px;left:${seccion.izq}px;width:${seccion.width}px;height:${seccion.height}px;${seccion.css};${seccion.contenido.layout.contenido.css}'>"
+            }
+        }
+
+        switch (seccion.tipo) {
+            case "Contenido":
+                if (seccion.contenido) {
+                    def pagina = seccion.contenido
+
+                    /* TODO  esta en tipo borrado ojo */
+                    pagina.secciones.each {
+                        out << g.mostrarSeccion(id: it.id, idioma: session.idioma.id, tipo: "Borrador")
+                    }
+                }
+                break;
+            case "Texto":
+                seccion.frases.each {
+                    if (it.idioma.id == idioma.id && it.estado == tipo) {
+                        out << it.frase
+                    }
+                }
+                break;
+            case "Link":
+                def sitio = session.sitio
+                /* todo  borrar esto*/
+//                if (!sitio)
+                //                    sitio = Sitio.findByNombre("fine")
+
+                out << "<a href='${createLink(uri: "/")}pagina/${sitio.nombre}/${seccion?.contenido?.nombre}'>"
+                seccion.frases.each {
+                    if (it.idioma.id == idioma.id && it.estado == tipo) {
+                        out << it.frase
+                    }
+                }
+                out << "</a>"
+
+                break;
+            case "Foto":
+                def image = seccion.foto
+                out << ig.img(["src": g.createLink(action: 'showImage', controller: 'image', id: image?.id), "alt": image?.caption, "title": image?.caption, "thumbnailSrc": g.createLink(action: 'showImage', controller: 'image', id: image?.id, params: [thumbnail: true])])
+                break;
+            case "Video":
+                out << '<iframe width="' + seccion.width + '" height="' + seccion.height + '" src="http://www.youtube.com/embed/' + seccion.video?.codigo + '" frameborder="0" allowfullscreen></iframe>'
+                break;
+            case "Galeria":
+                def gal = seccion.galeria
+                println "intentando mostrar la galeria 2 " + gal
+
+                if (gal) {
+
+                    def parms = [:]
+                    parms.galeria = gal
+
+                    def props = gal.propiedades
+                    def parts = props.split(",")
+                    parts.each {
+                        def p = it.split(":")
+                        if (p.size() == 2) {
+                            parms[p[0]] = p[1]
+                        }
+                    }
+
+                    out << gl.renderGal(parms)
+                }
+                break;
+
+            case "Layout":
+                if (seccion.contenido) {
+                    def pagina = seccion.contenido
+
+                    /* TODO  esta en tipo borrado ojo */
+                    pagina.secciones.each {
+                        out << g.mostrarSeccion(id: it.id, idioma: session.idioma.id, tipo: "Borrador")
+                    }
+
+
+                }
+                break;
+            case "Publicaciones":
+                def pag = seccion.pagina
+                println "\n\n>>> Publicaciones"
+                println pag
+                def pags = []
+                if (pag) {
+                    def tipoPagina = TipoPagina.findByPagina(pag)
+                    println tipoPagina
+                    if (tipoPagina) {
+                        if (!params.id) {
+                            pags = Pagina.findAllByTipoPagina(tipoPagina)
+                        }
+                    }
+                    println pags
+                    pags.each { p ->
+                        println p
+                        out << "<div style='width:" + p.layout.contenido.width + "px; height:" + p.layout.contenido.height + "px; position:relative;'>"
+                        /* TODO  esta en tipo borrado ojo */
+//                        def image = p.foto
+                        //                        out << ig.img(["src": g.createLink(action: 'showImage', controller: 'image', id: image?.id), "alt": image?.caption, "title": image?.caption, "thumbnailSrc": g.createLink(action: 'showImage', controller: 'image', id: image?.id, params: [thumbnail: true])])
+
+                        p.secciones.each {
+                            out << g.mostrarSeccion(id: it.id, idioma: session.idioma.id, tipo: "Borrador")
+                        }
+                        out << "</div>"
+//                        out << "<hr/>"
+                    }
+                }
+                break;
+            case "GuestBook":
+                def comentarios = Comentario.findAllBySeccionAndEstado(seccion, "Publicado", [sort: 'fecha', order: 'desc'])
+                def str = "", divAjax = "", form = "", css = "", divAdd = ""
+
+//                def titulo = Frase.findByTipoAndIdioma("gb_Titulo", session.idioma)
+//                def guardar = Frase.findByTipoAndIdioma("gb_Boton_Guardar", session.idioma)
+//                def agregar = Frase.findByTipoAndIdioma("gb_Boton_Agregar", session.idioma)
+//                def cancelar = Frase.findByTipoAndIdioma("gb_Boton_Cancelar", session.idioma)
+//                def frases = Frase.findAllByIdiomaAndTipoLike(session.idioma, "gb%", [sort: "orden"])
+
+                def titulo = Frase.withCriteria {
+                    and {
+                        eq("tipo", "gb_Titulo")
+                        eq("idioma", session.idioma)
+                        eq("seccion", seccion)
+                    }
+                }
+                titulo = titulo[0]
+                def guardar = Frase.withCriteria {
+                    and {
+                        eq("tipo", "gb_Boton_Guardar")
+                        eq("idioma", session.idioma)
+                        eq("seccion", seccion)
+                    }
+                }
+                guardar = guardar[0]
+                def agregar = Frase.withCriteria {
+                    and {
+                        eq("tipo", "gb_Boton_Agregar")
+                        eq("idioma", session.idioma)
+                        eq("seccion", seccion)
+                    }
+                }
+                agregar = agregar[0]
+                def cancelar = Frase.withCriteria {
+                    and {
+                        eq("tipo", "gb_Boton_Cancelar")
+                        eq("idioma", session.idioma)
+                        eq("seccion", seccion)
+                    }
+                }
+                cancelar = cancelar[0]
+                def frases = Frase.withCriteria {
+                    and {
+                        ilike("tipo", "gb%")
+                        eq("idioma", session.idioma)
+                        eq("seccion", seccion)
+                    }
+                }
+
+                css += "<style type='text/css' media='screen'>"
+
+                css += ".area {"
+                css += "border: solid 1px black;"
+                css += "margin-bottom: 10px;"
+                css += "padding:5px;"
+                css += "}"
+
+                css += ".add {"
+                css += 'font-size:10px;'
+                css += 'line-height:10px;'
+                css += "margin-bottom:10px;"
+                css += "}"
+
+                css += ".comentario {"
+                css += "border: solid 1px #999;"
+                css += "margin-bottom: 5px;"
+                css += "padding:3px;"
+                css += "min-height: 150px;"
+                css += "}"
+
+                css += ".nombre, .mail, .url, .fecha {"
+                css += "margin-bottom: 3px;"
+                css += "}"
+
+                css += ".nombre {"
+//                css += "background: #555;"
+                css += "padding-left: 10px;"
+                css += "}"
+
+                css += ".fecha {"
+                css += "font-size: smaller;"
+                css += "font-style: italic;"
+                css += "text-align: right;"
+                css += "float: right;"
+                css += "padding-right: 10px;"
+                css += "color : white;"
+                css += "}"
+
+                css += ".texto {"
+                css += "background: #ddd;"
+                css += "width: ${seccion.width - 190}px;"
+                css += "float     : right;"
+                css += "margin-top: 5px;"
+                css += "padding: 5px;"
+                css += "}"
+
+                css += ".label {"
+                css += "color: #eee;"
+                css += "font-weight:bold;"
+                css += "}"
+
+                css += ".foto {"
+                css += "border        : 2px solid #000000;"
+                css += "border-radius : 5px 5px 5px 5px;"
+//                css += "display       : inline-block;"
+                css += "float         : left;"
+                css += "line-height   : 0;"
+                css += "padding       : 2px;"
+                css += "height        : 75px;"
+                css += "width         : 120px;"
+                css += "text-align    : center;"
+                css += "background    : #f5f5f5;"
+                css += "margin-top    : 5px;"
+                css += "}"
+
+                css += "</style>"
+
+                divAdd += "<div class='add'>"
+                divAdd += "<a href='#' class='btnAdd'>" + agregar + "</a>"
+                divAdd += "</div>"
+
+                divAjax += "<div id='comentarios'>"
+                comentarios.each { com ->
+                    divAjax += gbk.displayItem(id: com.id, max: seccion.width, seccion: seccion.id)
+                }
+                divAjax += '</div>'
+
+//                def titulo = Frase.findByTipoAndIdioma("gb_Titulo", session.idioma)
+//                def guardar = Frase.findByTipoAndIdioma("gb_Boton_Guardar", session.idioma)
+//                def cancelar = Frase.findByTipoAndIdioma("gb_Boton_Cancelar", session.idioma)
+//                def frases = Frase.findAllByIdiomaAndTipoLike(session.idioma, "gb%", [sort: "orden"])
+
+                form += "<div id='addComment' title='" + titulo + "'>"
+                form += "<form method='post' enctype='multipart/form-data' class='form' id='frmComment' action='" + g.createLink(controller: 'guestbook', action: 'saveComment') + "'>"
+
+                form += "<input type='hidden' name='seccion.id' value='" + seccion.id + "' />"
+                form += "<input type='hidden' name='pagina.id' value='" + pagSeccion.id + "' />"
+
+                form += "<table>"
+
+                def nop = ["gb_Titulo", "gb_Boton_Guardar", "gb_Boton_Cancelar", "gb_Boton_Agregar", "gb_Anonimo"]
+
+                frases.each { frase ->
+                    if (!nop.contains(frase.tipo)) {
+                        if (frase.tipo == "gb_Comentario") {
+                            form += "<tr>"
+                            form += "<td class='label'>" + frase.frase + "</td>"
+                            form += "</tr>"
+
+                            form += "<tr>"
+                            form += "<td colspan='2'><textarea cols='5' rows='5' style='width:100%;' name='" + frase.tags + "'></textarea></td>"
+                            form += "</tr>"
+                        } else if (frase.tipo == "gb_Imagen") {
+                            form += "<tr>"
+                            form += "<td class='label'>" + frase.frase + "</td>"
+                            form += "<td><input type='file' name='" + frase.tags + "' /></td>"
+                            form += "</tr>"
+                        } else {
+                            form += "<tr>"
+                            form += "<td class='label'>" + frase.frase + "</td>"
+                            form += "<td><input type='text' name='" + frase.tags + "' /></td>"
+                            form += "</tr>"
+                        }
+                    }
+                }
+                form += "</table>"
+                form += "</form>"
+
+                form += "</div>"
+
+                def js = ""
+                js += "<script type='text/javascript'>"
+                js += '$(function() {'
+
+                js += '$("#addComment").dialog({'
+                js += 'width:430,'
+                js += 'closeOnEscape: false,'
+                js += 'autoOpen:false,'
+                js += 'modal:true,'
+                js += 'buttons: {'
+                js += '"' + guardar + '":function() {'
+
+                js += '$("#frmComment").submit();'
+                js += '},' //guardar
+                js += '"' + cancelar + '":function() {'
+                js += '$(this).dialog("close")'
+                js += '},' //cancelar
+                js += '}' //buttons
+                js += '});' //dialog
+
+                js += '$(".btnAdd").button({'
+//                js += 'text:false,'
+                js += 'icons: {'
+                js += 'primary: "ui-icon-plusthick"'
+                js += '}'
+                js += '}).click(function() {'
+                js += '$("#addComment").dialog("open");'
+                js += 'return false;'
+                js += '});'
+
+                js += '});'
+                js += "</script>"
+
+                str += "<div class='area'>"
+                str += css
+                str += divAdd
+                str += divAjax
+                if (comentarios.size() > 5) {
+                    str += divAdd
+                }
+                str += form
+                str += js
+                str += '</div>'
+
+                out << str
+                break;
+            case "Contacto":
+                def frm = "<form id='frmContacto'>"
+                def submit = "<input type='submit' "
+                def frases = Frase.findAllBySeccionAndIdioma(seccion, idioma, [sort: "orden"])
+                def nop = ["boton"]
+                frm += "<table>"
+                frases.each { frase ->
+                    frm += "<tr>"
+                    if (!nop.contains(frase.tags)) {
+                        frm += "<td>" + frase.frase + "</td>"
+                    }
+                    frm += "<td>"
+                    switch (frase.tags) {
+                        case "textfield":
+                            frm += "<input type='textfield' name='" + norm(frase.frase) + "' />"
+                            break;
+                        case "textarea":
+                            frm += "<textarea name='" + norm(frase.frase) + "' ></textarea>"
+                            break;
+                        case "boton":
+                            submit += " value='" + frase.frase + "' />"
+                            break;
+                    }
+                    frm += "</td>"
+                    frm += "</tr>"
+                }
+                frm += "<tr>"
+                frm += "<td colspan='2' style='text-align:center;'>"
+                frm += submit
+                frm += "</td>"
+                frm += "</tr>"
+                frm += "</table>"
+                frm += "</form>"
+                out << frm
+                break;
+        }
+        out << "</div>"
+
+
+    }
+
+    def imports = {
+        def sitio = session.sitio
+        if (session.sitio) {
+            def paginas = Pagina.findAllBySitio(sitio)
+            def path = 'css/menu/' + ((sitio.tipoMenu != null) ? sitio.tipoMenu : 'deepBlue')
+            //println "path " + path
+            out << '<link rel="stylesheet" href="' + resource(dir: path, file: 'menu_style.css') + '" type="text/css" />'
+        }
+//        out << '<script type="text/javascript" src="' + resource(dir: 'js/jquery/js', file: 'jquery-1.4.2.min.js') + '"></script>'
+        //        out << '<script type="text/javascript" src="' + resource(dir: 'js/jquery/js', file: 'jquery-ui-1.8.5.custom.min.js') + '"></script>'
+        //        out << '<link href="' + resource(dir: 'js/jquery/css/dark-hive', file: 'jquery-ui-1.8.5.custom.css') + '" rel="stylesheet" type="text/css" />'
+    }
+
+    def importsWeb = {
+        def sitio = session.sitio
+        if (session.sitio) {
+            def paginas = Pagina.findAllBySitio(sitio)
+            def path = 'css/menu/' + ((sitio.tipoMenu != null) ? sitio.tipoMenu : 'deepBlue')
+            //println "path as " + path + " sitio " + session.sitio.tipoMenu
+            out << '<link rel="stylesheet" href="' + resource(dir: path, file: 'menu_style.css') + '" type="text/css" />'
+
+            out << '<script type="text/javascript" src="' + resource(dir: 'js/jquery/js', file: 'jquery-1.4.2.min.js') + '"></script>'
+            out << '<script type="text/javascript" src="' + resource(dir: 'js/jquery/js', file: 'jquery-ui-1.8.5.custom.min.js') + '"></script>'
+            out << '<link href="' + resource(dir: 'js/jquery/css/dark-hive', file: 'jquery-ui-1.8.5.custom.css') + '" rel="stylesheet" type="text/css" />'
+
+            out << '<script type="text/javascript" src="' + resource(dir: 'js/jquery/plugins/lightbox/js', file: 'jquery.prettyPhoto.js') + '"></script>'
+            out << '<link href="' + resource(dir: 'js/jquery/plugins/lightbox/css', file: 'prettyPhoto.css') + '" rel="stylesheet" type="text/css" />'
+
+
+            out
+        }
+    }
+
+    def mostrarIdiomas = { attrs ->
+
+        def idiomas = Idioma.list([sort: "nombre"])
+        def tipo = attrs.tipoIdioma
+        def layout = new Layout()
+        if (attrs.layout) {
+            layout = Layout.get(attrs.layout)
+            tipo = layout.tipoIdioma
+        }
+        if (!tipo) {
+            tipo = "select"
+        }
+        def cssI = layout.cssIdioma
+        if (!cssI) {
+            cssI = ""
+//            cssI = "<style type='text/css'>"
+//            cssI += ".divIdioma a:link {"
+//            cssI += "text-decoration : none;"
+//            cssI += "color : black;"
+//            cssI += "}"
+//
+//            cssI += ".divIdioma a:visited {"
+//            cssI += "text-decoration : none;"
+//            cssI += "color : black;"
+//            cssI += "}"
+//
+//            cssI += ".divIdioma a:active {"
+//            cssI += "text-decoration : none;"
+//            cssI += "color : black;"
+//            cssI += "}"
+//
+//            cssI += ".divIdioma a:hover {"
+//            cssI += "text-decoration : underline;"
+//            cssI += "color : red;"
+//            cssI += "}"
+//
+//            cssI += ".idiomaActual {"
+//            cssI += "background : orange;"
+//            cssI += "}"
+//            cssI += "</style>"
+        }
+        def path = 'css/idiomas'
+//        def css = '<link rel="stylesheet" href="' + resource(dir: path, file: tipo + '.css') + '" type="text/css" />'
+////        def css = ""
+//        css += cssI
+        def css = ""
+        def ret = css
+
+        switch (tipo) {
+            case "select":
+                def sel = g.select(from: idiomas, name: "idioma", optionKey: "id", optionValue: "nombre", value: session.idioma.id)
+                if (attrs.tipo == "pagina") {
+                    def pag = Pagina.get(attrs.pagina)
+                    def link = g.createLink(controller: "paginaWeb", action: "show")
+                    def js = ""
+                    js += "<script type='text/javascript'>"
+                    js += '$(function() {'
+                    js += '$("#idioma").change(function() {'
+                    js += 'var id=$(this).val();'
+                    js += 'var url="' + link + '?pagina=' + pag.nombre + '&sitio=' + pag.sitio.nombre + '&idioma="+id;'
+//                    js += 'console.log(url);'
+                    js += 'location.href=url;'
+                    js += '});'
+                    js += '});'
+                    js += "</script>"
+                    ret += sel
+                    ret += js
+                } else {
+                    ret += sel
+                }
+                break;
+            case "links":
+            case "linksImagen":
+            case "imagen":
+                idiomas.each { idioma ->
+                    def actual = session.idioma.id == idioma.id ? "idiomaActual" : ""
+                    def txt = idioma.nombre
+                    def img = ""
+                    if (tipo == "linksImagen" || tipo == "imagen") {
+                        img = '<img class="imgIdioma" src="' + g.createLink(controller: 'idioma', action: 'showImage', id: idioma.id) + '" />'
+                    }
+                    def link1, link2
+                    if (attrs.tipo == "pagina") {
+                        def link = g.createLink(controller: "paginaWeb", action: "show")
+                        def pag = Pagina.get(attrs.pagina)
+                        def url = link + '?pagina=' + pag.nombre + '&sitio=' + pag.sitio.nombre + '&idioma=' + idioma.id
+                        link1 = "<a href='" + url + "' class='linkIdioma'>"
+                        link2 = "</a>"
+                    } else {
+                        link1 = "<a href='#' class='linkIdioma'>"
+                        link2 = "</a>"
+                    }
+                    if (tipo == "imagen") {
+                        txt = ""
+                    }
+                    ret += "<div class='divIdioma " + actual + "'>" + link1 + img + txt + link2 + "</div>"
+                }
+                break;
+        }
+
+
+        out << ret
+    }
+
+    def mostrarMenuPag = {attrs ->
+        def sitio = session.sitio
+        /* todo  borrar esto*/
+        if (!session.idioma)
+            session.idioma = Idioma.findByNombre("Español")
+        def paginas = Pagina.findAllBySitio(sitio, ["sort": "orden"])
+        def idioma = session.idioma
+        def frases = []
+        //println "menu " + idioma + " sitio " + sitio
+        out << "<ul class='menuSitio'>"
+        paginas.each {
+            def frase = Frase.find("from Frase where idioma=${idioma.id} and pagina=${it.id} ")
+//            println "frase!! " + frase
+            if (!frase) {
+                frase = Frase.find("from Frase where pagina=${it.id}")
+                //  println "if " + frase + " it " + it.id
+            }
+            if (frase)
+                out << "<li index='${it.id}'><a href='${createLink(uri: "/")}pagina/${sitio.nombre}/${it.nombre}' target='${(attrs.tipo == "editor") ? "_blank" : ""}' ${(attrs.actual.toInteger() == it.id) ? "class='active'" : ""}><span>" + frase?.frase + "</span></a></li>"
+            //frases.add(frase)
+        }
+        out << "</ul>"
+
+    }
+
+    def mostrarSeccionEditar = {attrs ->
+        def id = attrs["id"]
+        def idIdioma = attrs["idioma"]
+        def tipo = attrs["tipo"]
+
+        def seccionesNoEliminables = ["Publicaciones"]
+
+        def seccion = Seccion.get(id)
+        def idioma = Idioma.get(idIdioma)
+        //println "css ${seccion.css}"
+//        println "mostrar seccion "+id+" "+seccion.tipo
+        out << "<div id='${id}'  class='divSeccion' tipo='" + seccion.tipo + "' style='position:absolute;top:${seccion.top}px;left:${seccion.izq}px;width:${seccion.width}px;height:${(seccion.height) ? seccion.height : "40;"}px;${(seccion.css =~ "border") ? seccion.css : ("border: solid 1px black" + seccion.css)};${(seccion.css =~ "z-index") ? "" : "z-index:1;"}'>"
+
+
+        def btn = ['eliminar', 'editar', 'propiedades']
+        if (seccion.tipo == "Vacio") {
+            btn = ['eliminar', 'propiedades']
+        } else if (seccionesNoEliminables.contains(seccion.tipo)) {
+            btn = ['propiedades']
+        }
+
+        out << elm.barrita(title: seccion.tipo, botones: btn, float: 'right', id: seccion.id, param: "seccion=" + seccion.id + " tipo=" + seccion.tipo)
+
+//        out<<'<h3 class="ui-widget-header" id="'+seccion.id+'barra" style="margin:0px;position:relative;padding-left:5px;display:none;height:21px">'+seccion.tipo
+        //        out<<'<div class="ui-icon ui-icon-closethick botonDelete" seccion="'+seccion.id+'" title="Borrar sección" ></div> '
+        //        out<<'<div class="ui-icon ui-icon-document botonContenido" seccion="'+seccion.id+'" title="Editar contenido" tipo="'+seccion.tipo+'"></div>'
+        //        out<<'<div class="ui-icon ui-icon-pencil botonPropiedades" seccion="'+seccion.id+'" title="Editar Propiedades" ></div> '
+        //        out<<'</h3>'
+
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.id" id="' + seccion.id + 'id" value="' + seccion.id + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.top" id="' + seccion.id + 'top" value="' + seccion.top + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.izq" id="' + seccion.id + 'izq" value="' + seccion.izq + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.width" id="' + seccion.id + 'wid" value="' + seccion.width + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.height" id="' + seccion.id + 'hei" value="' + ((seccion.height) ? seccion.height : "40px") + '">'
+        out << '<input type="hidden" name="secciones.' + seccion.id + '.css" id="' + seccion.id + 'css" value="' + seccion.css + '">'
+        if (seccion.tipo != "Video") {
+            if (seccion.tipo != "Contenido") {
+                out << "<div id='${seccion.id}Contenido' >"
+            } else {
+                if (seccion.contenido) {
+                    out << "<div id='${seccion.id}Contenido' style='${seccion.contenido.layout.contenido.css};width:${seccion.contenido.layout.contenido.width}px;height:${seccion.contenido.layout.contenido.height}px' class='contenidoBody' >"
+                }
+            }
+        } else {
+            out << "<div id='${seccion.id}Contenido' style='margin-top:15px;'>"
+        }
+        switch (seccion.tipo) {
+            case "Contenido":
+//                out << g.mostrarSeccion(id: seccion.id, idioma: session.idioma.id, tipo: "Borrador")
+                if (seccion.contenido) {
+                    println "si contenido " + seccion.id + " " + seccion.contenido
+                    def pagina = seccion.contenido
+                    pagina.secciones.each {
+                        out << g.mostrarSeccion(id: it.id, idioma: session.idioma.id, tipo: "Borrador")
+                    }
+                }
+                break;
+            case "Texto":
+                seccion.frases.each {
+                    if (it.idioma == idioma && it.estado == tipo)
+                        out << it.frase
+                }
+                break;
+            case "Link":
+                seccion.frases.each {
+                    if (it.idioma == idioma && it.estado == tipo)
+                        out << it.frase
+                }
+                break;
+            case "Foto":
+                def image = seccion.foto
+                out << ig.img(["src": g.createLink(action: 'showImage', controller: 'image', id: image?.id), "alt": image?.caption, "title": image?.caption, "thumbnailSrc": g.createLink(action: 'showImage', controller: 'image', id: image?.id, params: [thumbnail: true])])
+                break;
+            case "Video":
+//                out << "<img src='" + seccion.video.thumbnail + "' />"
+                out << '<iframe width="' + seccion.width + '" height="' + seccion.height + '" src="http://www.youtube.com/embed/' + seccion.video?.codigo + '" frameborder="0" allowfullscreen></iframe>'
+                break;
+            case "Galeria":
+                def gal = seccion.galeria
+
+                def parms = [:]
+                parms.galeria = gal
+                if (seccion.galeria) {
+                    def props = gal.propiedades
+                    def parts = props.split(",")
+                    parts.each {
+                        def p = it.split(":")
+                        if (p.size() == 2) {
+                            parms[p[0]] = p[1]
+                        }
+                    }
+
+                    out << gl.renderGal(parms)
+                }
+                break;
+
+            case "GuestBook":
+
+                break;
+
+            case "Contacto":
+                def frm = "<form id='frmContacto' action='" + g.createLink(controller: 'contacto', action: 'submitForm') + "' method='POST'>"
+                def submit = "<input type='submit' "
+                def frases = Frase.findAllBySeccionAndIdioma(seccion, idioma, [sort: "orden"])
+                def nop = ["boton"]
+                frm += "<table>"
+                frases.each { frase ->
+                    frm += "<tr>"
+                    if (!nop.contains(frase.tags)) {
+                        frm += "<td>" + frase.frase + "</td>"
+                    }
+                    frm += "<td>"
+                    switch (frase.tags) {
+                        case "textfield":
+                            frm += "<input type='textfield' name='" + norm(frase.frase) + "' />"
+                            break;
+                        case "textarea":
+                            frm += "<textarea name='" + norm(frase.frase) + "' ></textarea>"
+                            break;
+                        case "boton":
+                            submit += " value='" + frase.frase + "' />"
+                            break;
+                    }
+                    frm += "</td>"
+                    frm += "</tr>"
+                }
+                frm += "<tr>"
+                frm += "<td colspan='2' style='text-align:center;'>"
+                frm += submit
+                frm += "</td>"
+                frm += "</tr>"
+                frm += "</table>"
+                frm += "</form>"
+                out << frm
+                break;
+
+        }
+        out << "</div>"
+        out << "</div>"
+    }
+
+    def norm(str) {
+        def s = str
+        s.replaceAll(" ", "_")
+        return s
+    }
+
+}

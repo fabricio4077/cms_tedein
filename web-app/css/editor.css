@@ -1,0 +1,289 @@
+/********************* CSS PARA LA BARRITA ****************************************/
+.barrita {
+    margin   : 0px;
+    position : absolute;
+    top      : 0;
+    left     : 0;
+    z-index  : 99;
+    padding  : 0; /*padding-left : 5px; */
+    display  : none;
+    height   : 21px;
+    width    : 100%;
+}
+
+.barrita_titulo {
+    padding : 0 5px 0 5px;
+}
+
+.botoncito {
+    width  : 15px;
+    height : 17px;
+    cursor : pointer;
+    margin : 1px !important;
+    border : 1px #f0f8ff solid !important;
+}
+
+.right {
+    float : right;
+}
+
+.left {
+    float : left;
+}
+
+.rightmost {
+    margin-right : 5px !important;
+}
+
+.leftmost {
+    margin-left : 5px !important;
+}
+
+/********************* FIN CSS PARA LA BARRITA ****************************************/
+
+.tituloSubmenu {
+    margin : 0 0 5px 0;
+}
+
+.menu {
+    /*margin-top : 15px;*/
+    text-align : center;
+    background : rgba(100, 100, 100, 0.3);
+    border     : #ccc solid 1px;
+    padding    : 10px 0 10px 0;
+    overflow-x : hidden;
+    overflow-y : auto;
+}
+
+.todoMenu {
+    width      : 200px;
+    height     : 400px;
+    /*margin     : 5px;*/
+    text-align : center;
+}
+
+.contenido {
+    margin     : auto;
+    margin-top : 15px;
+    width      : 1000px;
+    height     : 550px;
+    border     : 1px dotted black;
+}
+
+.boton {
+    clear         : both;
+    /*margin        : auto;*/
+    display       : block;
+    min-width     : 100px;
+
+    width         : 150px;
+    margin-bottom : 10px;
+    font-size     : 13px;
+}
+
+.new {
+    margin : 0 0 7px 0;
+}
+
+.volver {
+    margin : 7px 0 0 0;
+}
+
+.botones {
+    background : rgba(100, 100, 100, 0.2);
+    overflow-x : hidden;
+    overflow-y : auto;
+    padding    : 10px 0 10px 0;
+}
+
+.botonPropiedades {
+    float    : left;
+    width    : 15px;
+    height   : 15px;
+    position : absolute;
+    right    : 4px;
+    top      : 2px;
+    cursor   : pointer;
+    border   : 1px #f0f8ff solid;
+
+}
+
+.botonContenido {
+    float    : left;
+    width    : 15px;
+    height   : 10px;
+    position : absolute;
+    right    : 25px;
+    top      : 2px;
+    cursor   : pointer;
+    border   : 1px #f0f8ff solid;
+
+}
+
+.botonDelete {
+    float    : left;
+    width    : 15px;
+    height   : 10px;
+    position : absolute;
+    right    : 47px;
+    top      : 2px;
+    cursor   : pointer;
+    border   : 1px #f0f8ff solid;
+
+}
+
+.fila {
+    width     : 100%;
+    height    : 25px;
+    font-size : 11px;
+    float     : left;
+    display   : block;
+}
+
+.label {
+    width : 49%;
+    float : left;
+}
+
+.valor {
+    width : 49%;
+    float : right;
+}
+
+.smallLabel {
+    width        : 100px;
+    float        : left;
+    margin-right : 5px;
+}
+
+.etiqueta {
+    margin-right : 10px;
+    width        : 100px;
+    text-align   : right;
+    font-weight  : bold;
+}
+
+.texto {
+    width         : 250px;
+    padding-left  : 5px;
+    padding-right : 5px;
+    min-height    : 17px;
+}
+
+ul.topnav {
+    list-style : none;
+    padding    : 0 20px;
+    margin     : 0;
+    float      : left;
+    width      : 920px;
+    background : #222;
+    font-size  : 13px;
+    background : url(../images/dropMenu/topnav_bg.gif) repeat-x;
+}
+
+ul.topnav li {
+    float    : left;
+    margin   : 0;
+    padding  : 0 15px 0 0;
+    position : relative; /*--Declare X and Y axis base for sub navigation--*/
+    z-index  : 99999;
+}
+
+ul.topnav li a {
+    padding         : 10px 5px;
+    color           : #fff;
+    display         : block;
+    text-decoration : none;
+    float           : left;
+}
+
+ul.topnav li a:hover {
+    background : url(../images/dropMenu/topnav_hover.gif) no-repeat center top;
+}
+
+ul.topnav li span {
+    /*--Drop down trigger styles--*/
+    width      : 17px;
+    height     : 35px;
+    float      : left;
+    background : url(../images/dropMenu/subnav_btn.gif) no-repeat center top;
+}
+
+ul.topnav li span.subhover {
+    background-position : center bottom bottom;
+    cursor              : pointer;
+}
+
+/*--Hover effect for trigger--*/
+ul.topnav li ul.subnav {
+    list-style : none;
+    position   : absolute; /*--Important - Keeps subnav from affecting main navigation flow--*/
+    left       : 0;
+    top        : 35px;
+    background : #333;
+    margin     : 0;
+    padding    : 0;
+    display    : none;
+    float      : left;
+    width      : 170px;
+    border     : 1px solid #111;
+}
+
+ul.topnav li ul.subnav li {
+    margin        : 0;
+    padding       : 0;
+    border-top    : 1px solid #252525; /*--Create bevel effect--*/
+    border-bottom : 1px solid #444; /*--Create bevel effect--*/
+    clear         : both;
+    width         : 170px;
+}
+
+html ul.topnav li ul.subnav li a {
+    float        : left;
+    width        : 145px;
+    background   : #333 url(../images/dropMenu/dropdown_linkbg.gif) no-repeat 10px center;
+    padding-left : 20px;
+}
+
+html ul.topnav li ul.subnav li a:hover {
+    /*--Hover effect for subnav links--*/
+    background : #222 url(../images/dropMenu/dropdown_linkbg.gif) no-repeat 10px center;
+}
+
+/************************************ TAG IT **********************************************/
+.bckg {
+    background : #D3DFE5;
+    border     : #7D9099 1px solid !important;
+}
+
+.activo {
+    border : 3px solid #4682b4;
+}
+
+.tagit-input {
+    padding-left  : 5px !important;
+    padding-right : 5px !important;
+}
+
+.tagit-input {
+    width         : 90px;
+    padding-left  : 5px;
+    padding-right : 5px;
+    border        : #7D9099 1px solid !important;
+}
+
+.pencil {
+    background : url(../images/pencil-32.png) no-repeat right;
+    width      : 32px;
+    height     : 32px;
+    cursor     : pointer;
+}
+
+.disk {
+    background : url(../images/floppy-32.png) no-repeat right;
+}
+
+.editable {
+    cursor  : text;
+    padding : 0 3px 0 3px;
+}

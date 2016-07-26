@@ -1,0 +1,45 @@
+.menuSitio {
+    list-style-type:none;
+    width:auto;
+    position:relative;
+    display:block;
+    height:33px;
+    font-size:.6em;
+    background:url(images/bg.png) repeat-x top left;
+    background-color: #ff6666;
+    font-family:Verdana,Helvetica,Arial,sans-serif;
+    border:1px solid #000;
+    margin:0;
+    padding:0;
+}
+.menuSitio li {
+    display:block;
+    float:left;
+    margin:0;
+    padding:0;
+}
+.menuSitio li a {
+    float:left;
+    color: white;
+    text-decoration:none;
+    height:24px;
+    padding:9px 15px 0;
+    font-weight:bold;
+}
+.menuSitio li a:hover,.active {
+    color:#fff;
+    background:url(images/bg.png) repeat-x top left;
+    text-decoration:none;
+}
+.active  {
+    color:#fff;
+    font-weight:700;
+    background-color: white;
+}
+/*RED*/
+.menuSitio.red{
+    background-color:#B11718;
+}
+.menuSitio.red li a:hover, .menu.red li.current {
+    background-color:#DE3330;
+} 
